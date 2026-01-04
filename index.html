@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>楓之谷外傳-修練之路</title>
+    <style>
+        /* 日系動漫風格配色 */
+        :root {
+            --bg-beige: #FDF5E6; 
+            --header-brown: #8D6E63;
+            --card-white: #FFFFFF;
+            --text-coffee: #4E342E;
+            --border-light: #E0D7C6;
+            
+            /* 職業標籤顏色 */
+            --tag-explorer: #4A90E2;
+            --tag-brave: #9B59B6;
+            --tag-hero: #E74C3C;
+            --tag-legend: #2ECC71;
+            --tag-myth-bg: #1A1A1A;
+            --tag-myth-gold: #D4AF37;
+        }
+
+        body {
+            background-color: var(--bg-beige);
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-coffee);
+        }
+
+        /* 頂端主題 */
+        .app-header {
+            width: 100%;
+            background-color: var(--header-brown);
+            color: var(--bg-beige);
+            text-align: center;
+            padding: 15px 0;
+            font-weight: bold;
+            font-size: 1.5rem;
+            letter-spacing: 4px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            width: 95%;
+            max-width: 600px;
+            padding: 20px;
+        }
+
+        /* 角色卡片區 */
+        .profile-card {
+            background: var(--card-white);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            text-align: center;
+            margin-bottom: 25px;
+            border: 1px solid var(--border-light);
+        }
+
+        .job-badge {
+            padding: 5px 16px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            border: 1px solid #DDD;
+            display: inline-block;
+        }
+
+        .name-text { font-size: 1.6rem; font-weight: 900; margin-left: 12px; }
+        .level-text { font-size: 3rem; font-weight: 800; margin: 10px 0; color: var(--header-brown); }
+
+        /* 經驗條 */
+        .exp-container {
+            width: 100%;
+            height: 14px;
+            background: #E0E0E0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+            border: 1px solid #D7CCC8;
+        }
+        .exp-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #AED581, #66BB6A);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        /* 四欄屬性區 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+        .stat-card {
+            background: var(--card-white);
+            padding: 18px 5px;
+            border-radius: 18px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            border: 1px solid var(--border-light);
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .stat-label { font-size: 0.85rem; font-weight: bold; color: #8D6E63; margin-bottom: 5px; }
+        .stat-value { font-size: 1.8rem; font-weight: 800; margin-bottom: 8px; }
+        
+        /* 稱號樣式：字體加大且超粗體 */
+        .stat-title { 
+            font-size: 1.15rem; 
+            font-weight: 900; 
+            color: #5D4037; 
+            min-height: 2.6em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.2;
+            padding: 0 2px;
+        }
+
+        /* 任務按鈕區 (對照圖片配置) */
+        .training-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .full-width { grid-column: span 2; }
+
+        button {
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s;
+            font-size: 1rem;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+        }
+        button:active { transform: translateY(3px); box-shadow: none; }
+
+        .btn-str { background-color: #FFCCBC; color: #D84315; }
+        .btn-int { background-color: #C5CAE9; color: #283593; }
+        .btn-dex { background-color: #DCEDC8; color: #33691E; }
+        .btn-luk { background-color: #FFF9C4; color: #F57F17; }
+        .btn-undo { background-color: #D7CCC8; color: #5D4037; font-size: 1.1rem; }
+
+        /* Level Up 像素風格動畫 */
+        #lv-pop {
+            position: fixed;
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            z-index: 1000;
+        }
+        .pixel-lv {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 4.5rem;
+            color: #2ECC71;
+            font-weight: 900;
+            text-shadow: 5px 5px 0px #000;
+            -webkit-text-stroke: 2px #000;
+            animation: bounceIn 1.3s ease-out forwards;
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0.4); opacity: 0; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 0; }
+        }
+
+        /* 職業顏色 */
+        .tag-beginner { background: #FFF; color: #666; }
+        .tag-explorer { background: var(--tag-explorer); color: #FFF; }
+        .tag-brave { background: var(--tag-brave); color: #FFF; }
+        .tag-hero { background: var(--tag-hero); color: #FFF; }
+        .tag-legend { background: var(--tag-legend); color: #FFF; }
+        .tag-myth { background: var(--tag-myth-bg); color: var(--tag-myth-gold); border: 2px solid var(--tag-myth-gold); }
+
+        @media (max-width: 500px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-header">楓之谷外傳-修練之路</div>
+
+<div id="lv-pop"><div class="pixel-lv">LEVEL UP!</div></div>
+
+<div class="container">
+    <div class="profile-card">
+        <div>
+            <span id="job-tag" class="job-badge tag-beginner">初心者</span>
+            <span class="name-text">浚翔</span>
+        </div>
+        <div class="level-text">Lv. <span id="lv-num">1</span></div>
+        <div class="exp-container"><div id="exp-bar" class="exp-bar"></div></div>
+        <div style="font-size: 0.9rem; color: #8D6E63;">進度至下一級：<span id="exp-val">0</span> / 10</div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">STR</div>
+            <div id="str-val" class="stat-value">0</div>
+            <div id="str-title" class="stat-title"></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">INT</div>
+            <div id="int-val" class="stat-value">0</div>
+            <div id="int-title" class="stat-title"></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">DEX</div>
+            <div id="dex-val" class="stat-value">0</div>
+            <div id="dex-title" class="stat-title"></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">LUK</div>
+            <div id="luk-val" class="stat-value">0</div>
+            <div id="luk-title" class="stat-title"></div>
+        </div>
+    </div>
+
+    <div class="training-section">
+        <button class="btn-str" onclick="addStat('str', 1)">重訓 3次 (+1)</button>
+        <button class="btn-str" onclick="addStat('str', 2)">重訓 4次 (+2)</button>
+        
+        <button class="btn-int" onclick="addStat('int', 1)">讀書 30-60m (+1)</button>
+        <button class="btn-int" onclick="addStat('int', 2)">讀書 >60m (+2)</button>
+        
+        <button class="btn-dex" onclick="addStat('dex', 1)">跑步 10K (+1)</button>
+        <button class="btn-dex" onclick="addStat('dex', 2)">10K+5分速 (+2)</button>
+        
+        <button class="btn-luk full-width" onclick="addStat('luk', 1)">存 1000 元 (+1 LUK)</button>
+        
+        <button class="btn-undo full-width" onclick="undo()">⬅ 屬性返回 (Undo)</button>
+    </div>
+</div>
+
+<script>
+    let state = { str: 0, int: 0, dex: 0, luk: 0, history: [] };
+
+    const titleMap = {
+        str: [[800, "戰神的化身"], [500, "怪力無雙"], [300, "戰鬼"], [200, "破壞者"], [100, "剛腕戰士"], [50, "豪腕"]],
+        int: [[800, "全知的觀測者"], [500, "至高賢者"], [300, "真理探究者"], [200, "大魔導"], [100, "賢者"], [50, "博學者"]],
+        dex: [[800, "時空穿梭者"], [500, "閃光"], [300, "神速"], [200, "影行者"], [100, "疾風"], [50, "瞬足"]],
+        luk: [[2500, "MAX 這個世界對我太溫柔了"], [2000, "世界線偏向我"], [1500, "被選中的資本家"], [1000, "命運的優待生"], [800, "世界對我微笑"], [500, "強運持有者"], [300, "被金錢眷顧的人"], [200, "命運站在我這邊"], [100, "幸運的新手"], [50, "小有餘裕之人"]]
+    };
+
+    function addStat(key, val) {
+        // 紀錄歷史以便撤銷
+        state.history.push({ str: state.str, int: state.int, dex: state.dex, luk: state.luk });
+        
+        const oldTotal = state.str + state.int + state.dex + state.luk;
+        state[key] += val;
+        const newTotal = state.str + state.int + state.dex + state.luk;
+
+        // 升級邏輯：(總分/10)
+        if (Math.floor(newTotal / 10) > Math.floor(oldTotal / 10)) {
+            showLevelUp();
+        }
+        render();
+    }
+
+    function undo() {
+        if (state.history.length > 0) {
+            const last = state.history.pop();
+            Object.assign(state, last);
+            render();
+        }
+    }
+
+    function showLevelUp() {
+        const el = document.getElementById('lv-pop');
+        el.style.display = 'block';
+        setTimeout(() => el.style.display = 'none', 1300);
+    }
+
+    function render() {
+        // 更新數值與稱號
+        ['str', 'int', 'dex', 'luk'].forEach(s => {
+            document.getElementById(`${s}-val`).innerText = state[s];
+            let t = "";
+            for (let item of titleMap[s]) { 
+                if (state[s] >= item[0]) { t = item[1]; break; } 
+            }
+            document.getElementById(`${s}-title`).innerText = t;
+        });
+
+        const total = state.str + state.int + state.dex + state.luk;
+        const lv = Math.floor(total / 10) + 1;
+        const exp = total % 10;
+        
+        document.getElementById('lv-num').innerText = lv;
+        document.getElementById('exp-val').innerText = exp;
+        document.getElementById('exp-bar').style.width = (exp * 10) + "%";
+
+        // 更新職業
+        const tag = document.getElementById('job-tag');
+        tag.className = "job-badge";
+        if (lv < 10) { tag.innerText = "初心者"; tag.classList.add('tag-beginner'); }
+        else if (lv < 30) { tag.innerText = "冒險家"; tag.classList.add('tag-explorer'); }
+        else if (lv < 60) { tag.innerText = "勇者"; tag.classList.add('tag-brave'); }
+        else if (lv < 100) { tag.innerText = "英雄"; tag.classList.add('tag-hero'); }
+        else if (lv < 200) { tag.innerText = "傳說"; tag.classList.add('tag-legend'); }
+        else { tag.innerText = "神話"; tag.classList.add('tag-myth'); }
+
+        // 自動存檔
+        localStorage.setItem('maple_path_final', JSON.stringify(state));
+    }
+
+    // 初始化讀取
+    window.onload = () => {
+        const saved = localStorage.getItem('maple_path_final');
+        if (saved) {
+            const data = JSON.parse(saved);
+            state.str = data.str || 0;
+            state.int = data.int || 0;
+            state.dex = data.dex || 0;
+            state.luk = data.luk || 0;
+        }
+        render();
+    };
+</script>
+</body>
+</html>
